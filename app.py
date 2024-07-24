@@ -2,15 +2,21 @@ import streamlit as st
 
 # Function to convert hours and minutes to decimal time
 def convert_to_decimal_time(time_str):
-    hours, minutes = map(int, time_str.split(':'))
-    decimal_time = hours + minutes / 60
-    return decimal_time
+    try:
+        if ':' not in time_str:
+            time_str += ':00'
+        hours, minutes = map(int, time_str.split(':'))
+        decimal_time = hours + minutes / 60
+        return decimal_time
+    except ValueError:
+        st.error("Invalid time format. Please enter time in the format hours:minutes.")
+        return None
 
-# Function to convert decimal time to hours and minutes
+# Function to convert decimal time to hours and minutes with leading zero for minutes
 def convert_to_hours_minutes(decimal_time):
     hours = int(decimal_time)
     minutes = int((decimal_time - hours) * 60)
-    return hours, minutes
+    return hours, f'{minutes:02d}'  # Format minutes with leading zero
 
 # Streamlit app
 st.title('Daily BOH Goal Calculator')
@@ -24,31 +30,32 @@ units_ftw = st.number_input('Units of FTW to be Processed for the Day:', min_val
 if st.button('Calculate'):
     # Processing total time
     total_time = convert_to_decimal_time(time_input)
-    st.write(f'Total time (in decimal): {total_time}')
-    hours_total, minutes_total = convert_to_hours_minutes(total_time)
-    st.write(f'⏳ Total time: {hours_total}:{minutes_total}')
+    if total_time is not None:
+        st.write(f'Total time (in decimal): {total_time}')
+        hours_total, minutes_total = convert_to_hours_minutes(total_time)
+        st.write(f'⏳ Total time: {hours_total}:{minutes_total}')
 
-    # Time to process FTW
-    time_ftw = units_ftw / 140
-    hours_ftw, minutes_ftw = convert_to_hours_minutes(time_ftw)
-    st.write(f'⏳👟 Time to process FTW: {hours_ftw}:{minutes_ftw}')
+        # Time to process FTW
+        time_ftw = units_ftw / 140
+        hours_ftw, minutes_ftw = convert_to_hours_minutes(time_ftw)
+        st.write(f'⏳👟 Time to process FTW: {hours_ftw}:{minutes_ftw}')
 
-    # Remaining time to process APP
-    time_app = total_time - time_ftw
-    hours_app, minutes_app = convert_to_hours_minutes(time_app)
-    st.write(f'⏳👕 Remaining time to process APP: {hours_app}:{minutes_app}')
+        # Remaining time to process APP
+        time_app = total_time - time_ftw
+        hours_app, minutes_app = convert_to_hours_minutes(time_app)
+        st.write(f'⏳👕 Remaining time to process APP: {hours_app}:{minutes_app}')
 
-    # Goal for APP
-    goal_app = 90 * time_app
-    goal_app_round = round(goal_app)
-    st.write(f'👕 Goal for APP: {goal_app_round}')
+        # Goal for APP
+        goal_app = 90 * time_app
+        goal_app_round = round(goal_app)
+        st.write(f'👕 Goal for APP: {goal_app_round}')
 
-    # Time to Pricing APP
-    time_pricing = time_app * 0.3
-    hours_pricing, minutes_pricing = convert_to_hours_minutes(time_pricing)
-    st.write(f'🏷️ Time to Pricing APP: {hours_pricing}:{minutes_pricing}')
+        # Time to Pricing APP
+        time_pricing = time_app * 0.3
+        hours_pricing, minutes_pricing = convert_to_hours_minutes(time_pricing)
+        st.write(f'🏷️ Time to Pricing APP: {hours_pricing}:{minutes_pricing}')
 
-    # Time to Hanging APP
-    time_hanging = time_app * 0.7
-    hours_hanging, minutes_hanging = convert_to_hours_minutes(time_hanging)
-    st.write(f'〰️ Time to Hanging APP: {hours_hanging}:{minutes_hanging}')
+        # Time to Hanging APP
+        time_hanging = time_app * 0.7
+        hours_hanging, minutes_hanging = convert_to_hours_minutes(time_hanging)
+        st.write(f'〰️ Time to Hanging APP: {hours_hanging}:{minutes_hanging}')
